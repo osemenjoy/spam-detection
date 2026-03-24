@@ -71,6 +71,6 @@ def evaluate_model(name, model, X_test, y_test):
     plt.savefig(f"confusion_{name.replace(' ','_')}.png")
     plt.show()
 
-#evaluate_model("Naive Bayes",        nb_model,  X_test_scaled, y_test)
-#evaluate_model("SVM",                svm_model, X_test_scaled, y_test)
+evaluate_model("Naive Bayes",        nb_model,  X_test_scaled, y_test)
+evaluate_model("SVM",                svm_model, X_test_scaled, y_test)
 evaluate_model("Logistic Regression",lr_model,  X_test_scaled, y_test)
