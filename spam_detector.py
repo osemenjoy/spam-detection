@@ -3,7 +3,7 @@
 # =========================
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (accuracy_score, precision_score,
@@ -57,9 +57,8 @@ def evaluate_model(name, model, X_test, y_test):
 dataset_sizes = [0.1, 0.3, 0.6, 1.0]
 
 for size in dataset_sizes:
-    print(f"\n\n🚀 Training with {int(size*100)}% of dataset")
-
     subset = df.sample(frac=size, random_state=42)
+    print(f"\n\n🚀 Training with {int(size*100)}% of dataset ({len(subset)} emails)")
 
     X = subset.drop("label", axis=1)
     y = subset["label"]
@@ -67,17 +66,15 @@ for size in dataset_sizes:
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-
-    # Scaling
+    
+    print(f"  Training samples: {len(X_train)} | Test samples: {len(X_test)}")
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    X_test_scaled  = scaler.transform(X_test)
 
-    # =========================
-    # MODEL 1: Multinomial NB
-    # =========================
-    nb_model = MultinomialNB()
-    nb_model.fit(X_train, y_train)  # NOTE: no scaling for NB
+    # MODEL 1: Gaussian NB (correct for continuous features)
+    nb_model = GaussianNB()
+    nb_model.fit(X_train_scaled, y_train)  # ← use scaled data
 
     # =========================
     # MODEL 2: SVM (TUNED)
@@ -113,7 +110,7 @@ for size in dataset_sizes:
     # =========================
     # EVALUATION
     # =========================
-    evaluate_model("Naive Bayes", nb_model, X_test, y_test)
+    evaluate_model("Naive Bayes", nb_model, X_test_scaled, y_test)
     evaluate_model("SVM", svm_model, X_test_scaled, y_test)
     evaluate_model("Logistic Regression", lr_model, X_test_scaled, y_test)
 
@@ -136,4 +133,4 @@ def predict_sample(sample, model, scaler):
 
 
 # Example usage:
-# print(predict_sample(X_test.iloc[0], lr_model, scaler))
+print(predict_sample(X_test.iloc[0], lr_model, scaler))
